@@ -40,12 +40,18 @@ public class DBManager extends Base {
 	}
 
 	public static void save2DistDB(boolean first) {
-		DbUtil.insert(compare(first));
+		DbUtil.insert(compare(first),dist_table);
 	}
 	
 	
 	public static void deleteTempSourceData(){
 		DbUtil.delete();
+	}
+	
+	
+	public static void  saveClientTest(List<Entity> list) {
+		configInfo = PropertiesXmlFileUtil.readXML(MASTER_DATABASE_XML2);
+		DbUtil.insert(list,source_table);
 	}
 
 }

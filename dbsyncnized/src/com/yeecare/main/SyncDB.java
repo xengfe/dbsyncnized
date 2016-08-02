@@ -391,11 +391,11 @@ public class SyncDB {
 
 				@Override
 				public void run() {
-					long beginTime = System.currentTimeMillis();
+					Long begin = new Date().getTime();  
 					DBManager.save2DistDB(false);
 					// DBManager.deleteTempSourceData();
-					long endTime = System.currentTimeMillis();
-					System.out.println("running time:"+(endTime - beginTime) + " ms");
+			        Long end = new Date().getTime(); 
+					System.out.println("programe running time:"+(begin - end)/1000 + " ms");
 				}
 
 			};
