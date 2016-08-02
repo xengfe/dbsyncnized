@@ -30,6 +30,7 @@ public class PropertiesXmlFileUtil {
 			properties.setProperty("url", confing.url);
 			properties.setProperty("username", confing.username);
 			properties.setProperty("password", confing.password);
+			properties.setProperty("time", confing.time);
 
 
 			FileOutputStream fileOut = new FileOutputStream(xmlName);
@@ -72,6 +73,8 @@ public class PropertiesXmlFileUtil {
 						configInfo.username = value;
 					} else if (key.equals("password")) {
 						configInfo.password = value;
+					} else if (key.equals("time")) {
+						configInfo.time = value;
 					}
 
 				}
@@ -79,6 +82,7 @@ public class PropertiesXmlFileUtil {
 				configInfo.url = "";
 				configInfo.username = "";
 				configInfo.password = "";
+				configInfo.time = "";
 				writeXML(xmlName,configInfo);
 			}
 		

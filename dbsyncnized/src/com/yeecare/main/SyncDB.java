@@ -14,6 +14,7 @@ import java.io.PrintStream;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -64,6 +65,10 @@ public class SyncDB {
 	private static JDialog dialog;
 	
 	private static ToastDialog toastDialog;
+	private static JTextField timeField;
+	
+	private static int period ;
+	
 	
 
 	public static void main(String[] args) {
@@ -219,13 +224,15 @@ public class SyncDB {
 		accountLabel.setBounds(40, 80, 100, 20);
 		accountTextField = new JTextField();
 		accountTextField.setBounds(140,80,120,20);
-		fieldPanel.add(accountLabel);fieldPanel.add(accountTextField);
+		fieldPanel.add(accountLabel);
+		fieldPanel.add(accountTextField);
 		
 		JLabel pwdLabel = new JLabel("主数据库密码：");
 		pwdLabel.setBounds(40, 120, 100, 20);
 		pwdTextField = new JPasswordField();
 		pwdTextField.setBounds(140,120,120,20);
-		fieldPanel.add(pwdLabel);fieldPanel.add(pwdTextField);
+		fieldPanel.add(pwdLabel);
+		fieldPanel.add(pwdTextField);
 		
 		
 		JLabel subUrlLabel = new JLabel("从数据库 URL：");
@@ -239,13 +246,22 @@ public class SyncDB {
 		subAccountLabel.setBounds(350, 80, 100, 20);
 		subAccountTextField = new JTextField();
 		subAccountTextField.setBounds(450,80,120,20);
-		fieldPanel.add(subAccountLabel);fieldPanel.add(subAccountTextField);
+		fieldPanel.add(subAccountLabel);
+		fieldPanel.add(subAccountTextField);
 		
 		JLabel subPwdLabel = new JLabel("从数据库密码：");
 		subPwdLabel.setBounds(350, 120, 100, 20);
 		subPwdTextField = new JPasswordField();
 		subPwdTextField.setBounds(450,120,120,20);
-		fieldPanel.add(subPwdLabel);fieldPanel.add(subPwdTextField);
+		fieldPanel.add(subPwdLabel);
+		fieldPanel.add(subPwdTextField);
+		
+		JLabel timeJLabel = new JLabel("同步间隔时长：");
+		timeJLabel.setBounds(40, 160, 100, 20);
+		timeField = new JTextField();
+		timeField.setBounds(140,160,120,20);
+		fieldPanel.add(timeJLabel);
+		fieldPanel.add(timeField);
 		
 		c.add(fieldPanel,"Center");
 		
@@ -286,18 +302,20 @@ public class SyncDB {
 		config.url = urlTextField.getText().toString();
 		config.username = accountTextField.getText().toString();
 		config.password = pwdTextField.getText().toString();
+		config.time = timeField.getText().toString();
 
 		DataBaseConfigInfo subConfig = new DataBaseConfigInfo();
 		subConfig.url = subUrlTextField.getText().toString();
 		subConfig.username = subAccountTextField.getText().toString();
 		subConfig.password = subPwdTextField.getText().toString();
+		subConfig.time = timeField.getText().toString();
 
 		if (isValid(config.url) && isValid(config.username)
-				&& isValid(config.password) && isValid(subConfig.url)
-				&& isValid(subConfig.username) && isValid(subConfig.password)) {
+				&& isValid(config.password) && isValid(config.time) && isNumeric(config.time)
+				&& isValid(subConfig.url) && isValid(subConfig.username) && isValid(subConfig.password)) {
+			PropertiesXmlFileUtil.writeXML("subordinate_database.xml",subConfig);
 			PropertiesXmlFileUtil.writeXML("master_database.xml", config);
-			PropertiesXmlFileUtil.writeXML("subordinate_database.xml",
-					subConfig);
+			period  = Integer.valueOf(config.time);
 			dialog.dispose();
 		} else {
 			if (!isValid(config.url)) {
@@ -312,7 +330,11 @@ public class SyncDB {
 				toastDialog = new ToastDialog(frame, "请输入主数据库密码");
 				toastDialog.show();
 				
-			} else if (!isValid(subConfig.url)) {
+			} else if (!isValid(config.time)||!isNumeric(config.time)) {
+				toastDialog = new ToastDialog(frame, "请输入有整数");
+				toastDialog.show();
+				
+			}else if (!isValid(subConfig.url)) {
 				toastDialog = new ToastDialog(frame, "请输入从数据库url");
 				toastDialog.show();
 				
@@ -336,6 +358,10 @@ public class SyncDB {
 		 urlTextField.setText(master_config.url);
 		 accountTextField.setText(master_config.username);
 		 pwdTextField.setText(master_config.password);
+		 timeField.setText(master_config.time);
+		 if (isValid(master_config.time)) {
+			 period = Integer.valueOf(master_config.time);
+		}
 		 
 		 DataBaseConfigInfo sub_config = PropertiesXmlFileUtil.readXML(SUBORDINATE_DATABASE_XML);
 		 
@@ -359,7 +385,7 @@ public class SyncDB {
 		
 		if (!isbegin) {
 			int delay = 0;// 毫秒
-			int period = 10 * 1000;// 60s
+			int time = period * 1000;// 1s
 
 			TimerTask task = new TimerTask() {
 
@@ -374,7 +400,7 @@ public class SyncDB {
 
 			};
 			timer = new Timer();
-			timer.schedule(task, delay, period);
+			timer.schedule(task, delay, time);
 			isbegin = true;
 			
 		}else {
@@ -391,6 +417,17 @@ public class SyncDB {
 		}
 		return flag;
 	}
+	
+	
+	/**
+	 * 正则表达式：判断是否数字
+	 * @param str
+	 * @return
+	 */
+	public static boolean isNumeric(String str){ 
+	    Pattern pattern = Pattern.compile("[0-9]*"); 
+	    return pattern.matcher(str).matches();    
+	 }
 	
 	static class ToastDialog extends JDialog {
 		private String msg;
