@@ -395,7 +395,7 @@ public class SyncDB {
 					DBManager.save2DistDB(false);
 					// DBManager.deleteTempSourceData();
 			        Long end = new Date().getTime(); 
-					System.out.println("programe running time:"+(begin - end)/1000 + " ms");
+					System.out.println("programe running time:"+(end - begin)/1000 + " ms");
 				}
 
 			};
